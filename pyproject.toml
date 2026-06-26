@@ -30,3 +30,7 @@ ml = [
     "pandas",
     "numpy"
 ]
+
+stubs = [
+    "pandas-stubs",
+]
