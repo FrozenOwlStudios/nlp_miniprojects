@@ -23,12 +23,20 @@ dev = [
 nlp = [
     "nltk",
     "spacy",
-    "gensim"
+    "gensim",
+    "regex",
 ]
 
 ml = [
     "pandas",
     "numpy"
+]
+
+data_visualisation = [
+    "matplotlib",
+    "seaborn",
+    "fpdf",
+    "wordcloud"
 ]
 
 stubs = [

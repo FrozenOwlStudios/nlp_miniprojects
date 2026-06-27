@@ -16,28 +16,29 @@ file.
 # Better support for annotations (future imports must be first)
 from __future__ import annotations
 
-# Basic python imports
-import sys
-from pathlib import Path
-from argparse import ArgumentParser, ArgumentTypeError
-from dataclasses import dataclass
-from typing import NoReturn, Optional, Sequence, List, Dict, TextIO, Set, Counter, Tuple
-from io import StringIO
-
 # General utility libraries
 import re
+
+# Basic python imports
+import sys
+from argparse import ArgumentParser, ArgumentTypeError
+from dataclasses import dataclass
+from io import StringIO
+from pathlib import Path
+from typing import Counter, Dict, List, NoReturn, Optional, Sequence, Set, TextIO, Tuple
+
+import matplotlib.pyplot as plt  # pip install PyQt5
+
+# NLP related stuff
+import nltk
 import regex as rgx
 
 # Visualization tools
 from fpdf import FPDF
-import matplotlib.pyplot as plt  # pip install PyQt5
-from wordcloud import WordCloud
-
-# NLP related stuff
-import nltk
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.sentiment import SentimentIntensityAnalyzer
+from nltk.tokenize import sent_tokenize, word_tokenize
+from wordcloud import WordCloud
 
 
 # ==============================================================================
@@ -485,11 +486,13 @@ def plot_topic_frequencies(
     plt.close()
 
 
-def plot_sentiment_drift( book: Book,
+def plot_sentiment_drift(
+    book: Book,
     analysis: Dict[str, ChapterInfo],
     topics: Topics,
     output_path: str,
-    important_topics: Optional[List[str]]):
+    important_topics: Optional[List[str]],
+):
     plt.figure(figsize=(12, 7))
     chapters = [chapter.title for chapter in book]
 
@@ -506,7 +509,6 @@ def plot_sentiment_drift( book: Book,
             sent.append(analysis[chapter.title].topics[topic].sentiment)
 
         plt.plot(chapters, sent, marker="o", label=topic)
-    
 
     plt.axhline(0, linestyle="--")
     plt.title("Sentiment Drift Across Files")
@@ -568,6 +570,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         f"{cfg.out_path}/sentiment.png",
         select_important_topics(topics, analysis, 5),
     )
+
 
 if __name__ == "__main__":
     main()

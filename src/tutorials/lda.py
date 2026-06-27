@@ -9,7 +9,7 @@ This is example based on tutorial for Latent Dirichlet Anaysis
 #                                     IMPORTS
 # ======================================================================================
 import sys
-from typing import List, Optional, Set
+from typing import List, Set
 
 import nltk
 import pandas as pd
@@ -31,12 +31,12 @@ def read_documents(f_name: str) -> pd.DataFrame:
     data = pd.read_csv(f_name)
     print(SEPARATOR_LINE)
     print(f"Read CSV file at {sys.argv[1]}")
-    print(data.info())
+    data.info()
 
     documents = pd.DataFrame({"idx": data.index, "text": data["headline_text"]})
     print(SEPARATOR_LINE)
     print("After dataframe reformatting")
-    print(documents.info())
+    documents.info()
     print(documents.head())
     return documents
 
@@ -51,6 +51,7 @@ class MeaningfulWordExtractor:
 
     def __init__(self, extra_stopwords: List[str] = [], min_len: int = 3):
         self.stopwords = set(stopwords.words("english"))
+        self.stopwords.union(extra_stopwords)
         self.min_len = min_len
         self.lemmatizer = WordNetLemmatizer()
 
