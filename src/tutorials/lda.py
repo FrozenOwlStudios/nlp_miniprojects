@@ -9,9 +9,10 @@ This is example based on tutorial for Latent Dirichlet Anaysis
 #                                     IMPORTS
 # ======================================================================================
 import sys
-from typing import List, Set
+from typing import Dict, List, Set
 
 import nltk
+import numpy as np
 import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
@@ -68,6 +69,23 @@ class MeaningfulWordExtractor:
 
     def __call__(self, txt: str) -> List[str]:
         return self.extract(txt)
+
+
+class BagOfWords:
+    bow: np.ndarray
+    words: Dict[str, int]
+    documents: Dict[str, int]
+
+    def __init__(
+        self, bow: np.ndarray, words: Dict[str, int], documents: Dict[str, int]
+    ) -> None:
+        self.bow = bow
+        self.words = words
+        self.documents = documents
+
+    @staticmethod
+    def build_from_dataset(data: pd.DataFrame, column: str) -> BagOfWords:
+        pass
 
 
 # ======================================================================================
