@@ -8,8 +8,11 @@ This is example based on tutorial for Latent Dirichlet Anaysis
 # ======================================================================================
 #                                     IMPORTS
 # ======================================================================================
+from __future__ import annotations
+
 import sys
-from typing import Dict, List, Set
+from collections import Counter
+from typing import Dict, List, Optional, Set
 
 import nltk
 import numpy as np
@@ -74,18 +77,29 @@ class MeaningfulWordExtractor:
 class BagOfWords:
     bow: np.ndarray
     words: Dict[str, int]
-    documents: Dict[str, int]
 
-    def __init__(
-        self, bow: np.ndarray, words: Dict[str, int], documents: Dict[str, int]
-    ) -> None:
+    def __init__(self, bow: np.ndarray, words: Dict[str, int]) -> None:
         self.bow = bow
         self.words = words
-        self.documents = documents
 
     @staticmethod
-    def build_from_dataset(data: pd.DataFrame, column: str) -> BagOfWords:
-        pass
+    def build_from_dataset(data: pd.DataFrame, token_column: str) -> BagOfWords:
+        words = BagOfWords._pepare_word_dict(data, token_column)
+        bow = np.zeros((data.shape[0], len(words.keys())))
+        for idx, row in data.iterrows():
+            word_count = Counter(row[token_column])
+            for word, count in word_count.most_common():
+                bow[idx, words[word]] = count
+        return BagOfWords(bow, words)
+
+    @staticmethod
+    def _pepare_word_dict(data: pd.DataFrame, token_column: str) -> Dict[str, int]:
+        word_list: List[str] = []
+        for _, row in data.iterrows():
+            word_list.extend(row[token_column])
+        word_set = set(word_list)
+        words: Dict[str, int] = {word: idx for idx, word in enumerate(word_set)}
+        return words
 
 
 # ======================================================================================
@@ -100,6 +114,7 @@ def main() -> None:
     documents = documents[:10]
     documents["tokens"] = documents["text"].apply(extractor)
     print(documents.head())
+    BagOfWords.build_from_dataset(documents, "tokens")
 
 
 if __name__ == "__main__":
