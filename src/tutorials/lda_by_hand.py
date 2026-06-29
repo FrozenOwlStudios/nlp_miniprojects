@@ -14,7 +14,6 @@ import sys
 from collections import Counter
 from typing import Dict, List, Optional, Set
 
-import gensim
 import nltk
 import numpy as np
 import pandas as pd
@@ -75,22 +74,32 @@ class MeaningfulWordExtractor:
         return self.extract(txt)
 
 
-# ======================================================================================
-#                                  NLP FUNCTIONS
-# ======================================================================================
+class BagOfWords:
+    bow: np.ndarray
+    words: Dict[str, int]
 
+    def __init__(self, bow: np.ndarray, words: Dict[str, int]) -> None:
+        self.bow = bow
+        self.words = words
 
-def prepare_dictionary(tokens: pd.Series) -> gensim.corpora.Dictionary:
-    dictionary = gensim.corpora.Dictionary(tokens)
-    # Show words with counts from BoW
-    count = 0
-    for k, v in dictionary.iteritems():
-        print(k, v)
-        count += 1
-        if count > 10:
-            break
-    dictionary.filter_extremes(no_below=15, no_above=0.5, keep_n=100000)
-    return dictionary
+    @staticmethod
+    def build_from_dataset(data: pd.DataFrame, token_column: str) -> BagOfWords:
+        words = BagOfWords._pepare_word_dict(data, token_column)
+        bow = np.zeros((data.shape[0], len(words.keys())))
+        for idx, row in data.iterrows():
+            word_count = Counter(row[token_column])
+            for word, count in word_count.most_common():
+                bow[idx, words[word]] = count
+        return BagOfWords(bow, words)
+
+    @staticmethod
+    def _pepare_word_dict(data: pd.DataFrame, token_column: str) -> Dict[str, int]:
+        word_list: List[str] = []
+        for _, row in data.iterrows():
+            word_list.extend(row[token_column])
+        word_set = set(word_list)
+        words: Dict[str, int] = {word: idx for idx, word in enumerate(word_set)}
+        return words
 
 
 # ======================================================================================
@@ -102,10 +111,10 @@ def main() -> None:
         sys.exit()
     documents = read_documents(sys.argv[1])
     extractor = MeaningfulWordExtractor()
-    documents = documents[:50]
+    documents = documents[:10]
     documents["tokens"] = documents["text"].apply(extractor)
     print(documents.head())
-    dictionary = prepare_dictionary(documents["tokens"])
+    BagOfWords.build_from_dataset(documents, "tokens")
 
 
 if __name__ == "__main__":
