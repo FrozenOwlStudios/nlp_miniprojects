@@ -13,12 +13,14 @@ from __future__ import annotations
 import argparse
 import sys
 from collections import Counter
+from pprint import pprint
 from typing import Dict, List, Optional, Set
 
 import gensim
 import nltk
 import numpy as np
 import pandas as pd
+from gensim import corpora, models
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -120,6 +122,14 @@ def main() -> None:
                 bow_doc_4[i][0], dictionary[bow_doc_4[i][0]], bow_doc_4[i][1]
             )
         )
+    tfidf = models.TfidfModel(bow_corpus)
+    corpus_tfidf = tfidf[bow_corpus]
+    pprint(corpus_tfidf[0])
+    lda_model = gensim.models.LdaMulticore(
+        bow_corpus, num_topics=10, id2word=dictionary, passes=2, workers=2
+    )
+    for idx, topic in lda_model.print_topics(-1):
+        print("Topic: {} \nWords: {}".format(idx, topic))
 
 
 if __name__ == "__main__":
