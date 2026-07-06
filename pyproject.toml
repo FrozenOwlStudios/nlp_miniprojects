@@ -39,6 +39,10 @@ data_visualisation = [
     "wordcloud"
 ]
 
+web = [
+    "flask",
+]
+
 stubs = [
     "pandas-stubs",
 ]
