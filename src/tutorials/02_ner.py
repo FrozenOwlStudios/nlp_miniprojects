@@ -30,6 +30,7 @@ import sys
 from dataclasses import dataclass
 from typing import NoReturn
 
+import spacy
 from nltk import pos_tag
 from nltk.tokenize import sent_tokenize, word_tokenize
 
@@ -55,9 +56,53 @@ def read_text_file(f_path: str) -> str:
 #                                     NLP STACK
 # ======================================================================================
 
+SUBJECT_DEPENDENCIES = ("nsubj", "nsubjpass")
+OBJECT_DEPENDENCIES = ("dobj", "obj", "attr")
 
-def prepare_tokens(txt: str) -> list[list[str]]:
-    return [word_tokenize(sent) for sent in sent_tokenize(txt)]
+
+@dataclass
+class Entity:
+    name: str
+    label: str
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Entity):
+            return False
+
+        return self.name == other.name and self.label == other.label
+
+
+@dataclass
+class Relation:
+    actor: str
+    target: str
+    action: str
+
+
+def nlp_stack(txt: str):
+    nlp = spacy.load("en_core_web_sm")
+    document = nlp(txt)
+
+    entity_list = [Entity(e.text, e.label_) for e in document.ents]
+    entities = []
+    for entity in entity_list:
+        if entity not in entities:
+            entities.append(entity)
+    for entity in entities:
+        print(entity)
+
+    relations = []
+    for word in document:
+        if word.pos_ != "VERB":
+            continue
+        subjects = [t for t in word.children if t.dep_ in SUBJECT_DEPENDENCIES]
+        objects = [t for t in word.children if t.dep_ in OBJECT_DEPENDENCIES]
+
+        if len(subjects) == 1 and len(objects) == 1:
+            relations.append(Relation(subjects[0].text, objects[0].text, word.text))
+
+    for relation in relations:
+        print(relation)
 
 
 # ======================================================================================
@@ -86,12 +131,7 @@ def main():
     cfg = Config.from_args()
     print(cfg)
     txt = read_text_file(cfg.txt_file)
-    tokenized_sentences = prepare_tokens(txt)
-
-    for sentence in tokenized_sentences:
-        tagged_sent = pos_tag(sentence)
-        print("=======================================")
-        print(tagged_sent)
+    nlp_stack(txt)
 
 
 if __name__ == "__main__":
