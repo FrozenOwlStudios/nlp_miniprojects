@@ -6,7 +6,7 @@ name = "nlp-miniprojects"
 version = "0.1.0"
 description = "A project that covers all simple one-file miniprojects related to nlp"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = []
 
 [dependency-groups]
