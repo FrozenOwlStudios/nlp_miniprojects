@@ -9,6 +9,8 @@ import sys
 from dataclasses import dataclass
 from typing import NoReturn
 
+from cltk import NLP
+
 
 # ======================================================================================
 #                                    HELPER FUNCTIONS
@@ -41,6 +43,7 @@ def read_text_file(f_path: str, lines: int | None = None) -> str:
 class Config:
     txt_file: str
     lines: int | None
+    lang_code: str
 
     @staticmethod
     def from_args() -> Config:
@@ -51,13 +54,16 @@ class Config:
         )
 
         prsr.add_argument(
-            "-l",
+            "-n",
             "--lines",
             type=int,
             help="Number of lines that will be processed.",
         )
+        prsr.add_argument("-l", "--lang_code", type=str, default="lati1261")
         args = prsr.parse_args()
-        return Config(txt_file=args.txt_file, lines=args.lines)
+        return Config(
+            txt_file=args.txt_file, lines=args.lines, lang_code=args.lang_code
+        )
 
 
 # ======================================================================================
@@ -68,6 +74,13 @@ def main():
     print(cfg)
     txt = read_text_file(cfg.txt_file, cfg.lines)
     print(txt)
+    nlp = NLP(
+        cfg.lang_code,
+        backend="stanza",
+        suppress_banner=True,
+    )
+
+    return nlp.analyze(txt)
 
 
 if __name__ == "__main__":
