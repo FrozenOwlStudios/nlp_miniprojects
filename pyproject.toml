@@ -22,6 +22,8 @@ dev = [
 
 nlp = [
     "nltk",
+    "cltk>=2.5",
+    "cltk[stanza]",
     "spacy",
     "gensim",
     "regex",
