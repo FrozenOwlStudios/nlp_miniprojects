@@ -1,0 +1,197 @@
+# ============================================================
+# NLTK RegexpParser grammar intended as an intermediate 
+# shallow-parsing stage for Named Entity Recognition and 
+# Relation Extraction.
+#
+# Author Frozen Owl
+#
+# Penn Treebank POS tags:
+#   NN   noun, singular
+#   NNS  noun, plural
+#   NNP  proper noun, singular
+#   NNPS proper noun, plural
+#   JJ   adjective
+#   JJR  comparative adjective
+#   JJS  superlative adjective
+#   DT   determiner
+#   PDT  predeterminer
+#   PRP  personal pronoun
+#   PRP$ possessive pronoun
+#   POS  possessive ending
+#   CD   cardinal number
+#   RB   adverb
+#   RBR  comparative adverb
+#   RBS  superlative adverb
+#   IN   preposition/subordinating conjunction
+#   TO   "to"
+#   CC   coordinating conjunction
+#   VB*  verbs
+#   MD   modal
+#
+# ============================================================
+
+
+# ------------------------------------------------------------
+# BASIC PROPER-NAME SEQUENCES
+# ------------------------------------------------------------
+
+PROPER_NAME:
+    {<NNP|NNPS>+}
+
+
+# ------------------------------------------------------------
+# PERSON-LIKE NAME CANDIDATES
+#
+# These are intentionally permissive.
+# Lexical validation can happen later in the NER stage.
+# ------------------------------------------------------------
+
+PERSON_NAME:
+    {<NNP><NNP>}
+    {<NNP><NNP><NNP>}
+    {<NNP><NNP><NNP><NNP>}
+    {<NNP><POS><NNP>}
+    {<NNP|NNPS>+}
+
+# ------------------------------------------------------------
+# NOUN COMPOUNDS
+#
+# Examples:
+#   software company
+#   research laboratory
+#   financial services company
+#   artificial intelligence system
+# ------------------------------------------------------------
+
+NOUN_COMPOUND:
+    {<NN|NNS>+}
+    {<NN|NNS><NN|NNS>+}
+    {<JJ|JJR|JJS>*<NN|NNS><NN|NNS>+}
+
+
+# ------------------------------------------------------------
+# ADJECTIVE PHRASES
+#
+# Examples:
+#   large
+#   extremely large
+#   highly successful
+#   very old
+# ------------------------------------------------------------
+
+ADJP:
+    {<JJ|JJR|JJS>}
+    {<RB|RBR|RBS>+<JJ|JJR|JJS>+}
+    {<JJ|JJR|JJS><CC><JJ|JJR|JJS>}
+
+# ------------------------------------------------------------
+# SIMPLE NOUN PHRASES
+#
+# Examples:
+#   the company
+#   a large company
+#   several European companies
+#   the new research laboratory
+# ------------------------------------------------------------
+
+NP:
+    {<DT|PDT>?<PRP\$>?<JJ|JJR|JJS>*<NN|NNS>+}
+    {<DT|PDT>?<PRP\$>?<JJ|JJR|JJS>*<NNP|NNPS>+}
+    {<PRP>}
+    {<CD><NN|NNS>+}
+
+
+# ------------------------------------------------------------
+# PREPOSITIONAL PHRASES
+#
+# Examples:
+#   in London
+#   at the company
+#   from the United States
+#   with Microsoft
+# ------------------------------------------------------------
+
+PP:
+    {<IN><NP>}
+    {<IN><COMPLEX_NP>}
+    {<IN><PROPER_NAME>}
+    {<TO><NP>}
+    {<TO><PROPER_NAME>}
+
+# ------------------------------------------------------------
+# MODAL PHRASES
+#
+# Examples:
+#   can acquire
+#   may become
+#   could purchase
+# ------------------------------------------------------------
+
+MODAL_VP:
+    {<MD><VB>}
+    {<MD><RB>*<VB>}
+
+# ------------------------------------------------------------
+# COORDINATED NOUN PHRASES
+#
+# Examples:
+#   Google and Microsoft
+#   France, Germany and Italy
+#   the president and CEO
+# ------------------------------------------------------------
+
+COORD_NP:
+    {<NP><CC><NP>}
+    {<PROPER_NAME><CC><PROPER_NAME>}
+    {<NNP|NNPS>+<CC><NNP|NNPS>+}
+    {<NN|NNS>+<CC><NN|NNS>+}
+
+# ------------------------------------------------------------
+# SIMPLE VERB PHRASES
+#
+# Examples:
+#   acquired
+#   has acquired
+#   was acquired
+#   will acquire
+#   has recently acquired
+# ------------------------------------------------------------
+
+VP:
+    {<VB|VBD|VBG|VBN|VBP|VBZ>+<RB>*}
+    {<VB|VBD|VBG|VBN|VBP|VBZ>}
+    {<MD>?<RB>*<VB|VBD|VBG|VBN|VBP|VBZ>+}
+
+
+# ------------------------------------------------------------
+# VERB + OBJECT
+#
+# Useful relation-extraction intermediate representation.
+#
+# Examples:
+#   acquired the company
+#   founded Microsoft
+#   appointed John Smith
+# ------------------------------------------------------------
+
+VP_OBJECT:
+    {<VP><NP>}
+    {<VP><COMPLEX_NP>}
+    {<VP><PROPER_NAME>}
+    {<VP><ORG_CANDIDATE>}
+    {<VP><PERSON_NAME>}
+
+
+# ------------------------------------------------------------
+# VERB + PREPOSITIONAL COMPLEMENT
+#
+# Examples:
+#   works at Microsoft
+#   lives in London
+#   graduated from Oxford
+# ------------------------------------------------------------
+
+VP_PP:
+    {<VP><PP>}
+    {<VP><PP>+}
+

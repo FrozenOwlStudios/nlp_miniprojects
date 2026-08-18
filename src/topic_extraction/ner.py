@@ -9,6 +9,7 @@ import sys
 from dataclasses import dataclass
 from typing import NoReturn
 
+import nltk
 from nltk import RegexpParser, pos_tag
 from nltk.tokenize import sent_tokenize, word_tokenize
 
@@ -107,6 +108,7 @@ POS_CODES_DESCRIPTION = {
     "WRB": "wh-adverb where, when",
 }
 
+CHUNK_LABELS = ["PROPER_NAME", "VP"]
 # ======================================================================================
 #                                   NLP FUNCTIONS
 # ======================================================================================
@@ -130,17 +132,27 @@ def main():
     grammar = read_text_file(cfg.grammar_file)
     tagged_sentences = prepare_tagged_sentences(txt)
     chunker = RegexpParser(grammar)
-    for sentence in tagged_sentences:
-        for word in sentence:
-            try:
-                tag = POS_CODES_DESCRIPTION[word[1]]
-                print(f"{word[0]} - {word[1]} ({tag})")
-            except KeyError:
-                print(f"{word[0]} - {word[1]}")
+    # for sentence in tagged_sentences:
+    #  for word in sentence:
+    #       try:
+    #           tag = POS_CODES_DESCRIPTION[word[1]]
+    #           print(f"{word[0]} - {word[1]} ({tag})")
+    #       except KeyError:
+    #           print(f"{word[0]} - {word[1]}")
 
-    result = chunker.parse(tagged_sentences[0])
-    print(result)
-    # result.draw()
+    entities = set()
+    for sentence in tagged_sentences:
+        parsed_sentence: nltk.Tree = chunker.parse(sentence)
+        for subtree in parsed_sentence.subtrees():
+            if subtree.label() in CHUNK_LABELS:
+                print(subtree)
+            if subtree.label() == "PROPER_NAME":
+                dd = [a[0] for a in subtree.leaves()]
+                entities.add(" ".join(dd))
+
+    print("Named entities : ")
+    for ent in entities:
+        print(ent)
 
 
 if __name__ == "__main__":
