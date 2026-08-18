@@ -6,7 +6,7 @@ A example of tokenizers.
 #                                      IMPORTS
 # =======================================================================================
 import nltk
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import TreebankWordTokenizer, word_tokenize
 
 # =======================================================================================
 #                                     GLOBALS
@@ -23,6 +23,12 @@ EXAMPLE_SENTENCE: str = (
 def word_tokenize_demo():
     print(f"Sentence : {EXAMPLE_SENTENCE}")
     tokens = word_tokenize(EXAMPLE_SENTENCE)
+    print("====== word_tokenize ======")
+    print(f"Token count : {len(tokens)}")
+    print(f"Tokens : {tokens}")
+    tokenizer_wrd = TreebankWordTokenizer()
+    tokens = tokenizer_wrd.tokenize(EXAMPLE_SENTENCE)
+    print("====== TreebankWordTokenizer ======")
     print(f"Token count : {len(tokens)}")
     print(f"Tokens : {tokens}")
 

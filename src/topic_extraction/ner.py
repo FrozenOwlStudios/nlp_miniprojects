@@ -9,7 +9,7 @@ import sys
 from dataclasses import dataclass
 from typing import NoReturn
 
-from nltk import pos_tag
+from nltk import RegexpParser, pos_tag
 from nltk.tokenize import sent_tokenize, word_tokenize
 
 
@@ -36,6 +36,7 @@ def read_text_file(f_path: str) -> str:
 @dataclass(frozen=True)
 class Config:
     txt_file: str
+    grammar_file: str
     lines: int | None
 
     @staticmethod
@@ -47,6 +48,14 @@ class Config:
         )
 
         prsr.add_argument(
+            "-g",
+            "--grammar_file",
+            type=str,
+            required=True,
+            help="Path to file with grammar for chunker",
+        )
+
+        prsr.add_argument(
             "-n",
             "--lines",
             type=int,
@@ -55,6 +64,7 @@ class Config:
         args = prsr.parse_args()
         return Config(
             txt_file=args.txt_file,
+            grammar_file=args.grammar_file,
             lines=args.lines,
         )
 
@@ -117,7 +127,9 @@ def main():
     print(cfg)
 
     txt = read_text_file(cfg.txt_file)
+    grammar = read_text_file(cfg.grammar_file)
     tagged_sentences = prepare_tagged_sentences(txt)
+    chunker = RegexpParser(grammar)
     for sentence in tagged_sentences:
         for word in sentence:
             try:
@@ -125,6 +137,10 @@ def main():
                 print(f"{word[0]} - {word[1]} ({tag})")
             except KeyError:
                 print(f"{word[0]} - {word[1]}")
+
+    result = chunker.parse(tagged_sentences[0])
+    print(result)
+    # result.draw()
 
 
 if __name__ == "__main__":
