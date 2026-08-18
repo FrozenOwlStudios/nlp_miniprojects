@@ -5,7 +5,7 @@
 #
 # Author Frozen Owl
 #
-# Penn Treebank POS tags:
+#   Penn Treebank POS codes:
 #   NN   noun, singular
 #   NNS  noun, plural
 #   NNP  proper noun, singular
@@ -27,6 +27,30 @@
 #   CC   coordinating conjunction
 #   VB*  verbs
 #   MD   modal
+#
+# ------------------------------------------------------------
+#   Penn Treebank phrase/constituent codes
+#   ADJP    Adjective phrase
+#   ADVP    Adverb phrase
+#   CONJP   Conjunction phrase
+#   FRAG    Fragment
+#   INTJ    Interjection phrase
+#   LST     List marker
+#   NAC     Not-a-constituent; used for certain structures inside NPs
+#   NP      Noun phrase
+#   NX      Nominal constituent inside an NP
+#   PP      Prepositional phrase
+#   PRN     Parenthetical
+#   PRT     Particle phrase
+#   QP      Quantifier phrase
+#   RRC     Reduced relative clause
+#   UCP     Unlike coordinated phrase
+#   VP      Verb phrase
+#   WHADJP  Wh-adjective phrase
+#   WHADVP  Wh-adverb phrase
+#   WHNP    Wh-noun phrase
+#   WHPP    Wh-prepositional phrase
+#   X       Unknown/indeterminate constituent
 #
 # ============================================================
 
