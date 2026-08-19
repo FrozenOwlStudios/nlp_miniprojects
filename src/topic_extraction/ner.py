@@ -144,8 +144,8 @@ def main():
     for sentence in tagged_sentences:
         parsed_sentence: nltk.Tree = chunker.parse(sentence)
         for subtree in parsed_sentence.subtrees():
-            if subtree.label() in CHUNK_LABELS:
-                print(subtree)
+            #            if subtree.label() in CHUNK_LABELS:
+            #                print(subtree)
             if subtree.label() == "PROPER_NAME":
                 dd = [a[0] for a in subtree.leaves()]
                 entities.add(" ".join(dd))
