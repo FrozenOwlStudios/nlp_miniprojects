@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Minimal</title>
+    <meta name="description" content="A minimal website template." />
+    <link
+      href="{{ url_for('static',filename='style.css') }}"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <header>
+      <div class="container">
+        <nav>
+          <a href="#" class="logo">Minimal.</a>
+
+          <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <a href="#chat">Chat</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="hero">
+          <h1>Simple ideas.<br />Clean execution.</h1>
+
+          <p>
+            A lightweight, responsive HTML template designed as a clean starting
+            point for your next project.
+          </p>
+
+          <a href="#about" class="button">Explore</a>
+        </div>
+
+        <section id="about">
+          <h2>About</h2>
+          <p>
+            Add your content here. The layout intentionally stays simple so it
+            can easily be adapted to a portfolio, landing page, product site, or
+            personal website.
+          </p>
+        </section>
+
+        <section id="contact">
+          <h2>Contact</h2>
+          <p>hello@example.com</p>
+        </section>
+
+        <section id="chat">
+          <div class="chat">
+            <div id="messages" class="messages">
+              <div class="message bot">Hello! Send me a message.</div>
+            </div>
+
+            <form id="chat-form" class="chat-form">
+              <input
+                id="message-input"
+                type="text"
+                placeholder="Type a message..."
+                autocomplete="off"
+              />
+
+              <button type="submit">Send</button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">© 2026 Minimal.</div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+  </body>
+</html>

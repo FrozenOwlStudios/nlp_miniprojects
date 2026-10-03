@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 from dataclasses import dataclass
 from typing import NoReturn
@@ -113,12 +114,25 @@ CHUNK_LABELS = ["PROPER_NAME", "VP"]
 #                                   NLP FUNCTIONS
 # ======================================================================================
 
+re_upper_only = re.compile("[A-Z]+")
+re_nonalpha = re.compile("[^A-Za-z]")
+
 
 def prepare_tagged_sentences(txt: str) -> list[list[tuple[str, str]]]:
     raw_sentences = sent_tokenize(txt)
     tokenized_sentences = [word_tokenize(sent) for sent in raw_sentences]
-    tagged_sentences = [pos_tag(sent) for sent in tokenized_sentences]
+    normalized_sentences = []
+    for sentence in tokenized_sentences:
+        normalized_sentences.append(list(map(normalize_string, sentence)))
+    tagged_sentences = [pos_tag(sent) for sent in normalized_sentences]
     return tagged_sentences
+
+
+def normalize_string(txt: str) -> str:
+    # txt = re_nonalpha.sub(txt, "")
+    if re_upper_only.fullmatch(txt):
+        txt = txt.lower()
+    return txt
 
 
 # ======================================================================================
@@ -146,7 +160,7 @@ def main():
         for subtree in parsed_sentence.subtrees():
             #            if subtree.label() in CHUNK_LABELS:
             #                print(subtree)
-            if subtree.label() == "PROPER_NAME":
+            if subtree.label() in ["PERSON_NAME", "PROPER_NAME"]:
                 dd = [a[0] for a in subtree.leaves()]
                 entities.add(" ".join(dd))
 
