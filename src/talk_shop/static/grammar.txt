@@ -1,0 +1,28 @@
+S -> PRICE_QUESTION
+S -> STOCK_QUESTION
+
+PRICE_QUESTION -> HOW_MUCH BE DET ITEM
+PRICE_QUESTION -> WHAT BE DET ITEM PRICE
+
+STOCK_QUESTION -> BE DET ITEM AVAILABLE
+STOCK_QUESTION -> DO YOU HAVE DET ITEM
+STOCK_QUESTION -> BE DET ITEM IN_STOCK
+
+HOW_MUCH -> 'how' 'much'
+WHAT -> 'what'
+
+BE -> 'is' | 'are'
+DO -> 'do'
+YOU -> 'you'
+HAVE -> 'have'
+
+DET -> 'the' | 'a' | 'any'
+
+PRICE -> 'price'
+AVAILABLE -> 'available'
+IN_STOCK -> 'in' 'stock'
+
+ITEM -> 'tshirt'
+ITEM -> 'jeans'
+ITEM -> 'jacket'
+ITEM -> 'hoodie'
