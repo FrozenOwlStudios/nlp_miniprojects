@@ -10,6 +10,7 @@ import argparse
 from core.shop import Product
 from flask import Flask, jsonify, render_template, request
 from models.shop import DatabaseModels, ProductModel
+from services.chat import prepare_chat_response, prepare_globals
 from sqlalchemy import create_engine, select
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
@@ -20,16 +21,6 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 # ======================================================================================
 def main_site():
     return render_template("index.html")
-
-
-def chat():
-    data = request.get_json()
-
-    user_message = data["message"]
-
-    response = "Hello! This is a response from the Python backend."
-
-    return jsonify({"response": response})
 
 
 # ======================================================================================
@@ -84,7 +75,7 @@ def main():
 
     app = Flask(__name__)
     app.route("/", methods=["GET", "POST"])(main_site)
-    app.route("/api/chat", methods=["POST"])(chat)
+    app.route("/api/chat", methods=["POST"])(prepare_chat_response)
     app.run(debug=True)
 
 
