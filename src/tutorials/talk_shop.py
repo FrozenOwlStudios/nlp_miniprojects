@@ -2,9 +2,7 @@
 #                                      INCLUDES
 # ======================================================================================
 from dataclasses import dataclass
-from os import wait
 
-import nltk
 from lark import Lark, Token, Tree
 
 
