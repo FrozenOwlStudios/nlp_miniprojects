@@ -27,6 +27,7 @@ nlp = [
     "spacy",
     "gensim",
     "regex",
+    "lark"
 ]
 
 llm = [
