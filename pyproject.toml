@@ -29,6 +29,11 @@ nlp = [
     "regex",
 ]
 
+llm = [
+    "langchain",
+    "langchain-ollama"
+]
+
 ml = [
     "pandas",
     "numpy"
