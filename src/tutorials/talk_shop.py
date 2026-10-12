@@ -2,9 +2,10 @@
 #                                      INCLUDES
 # ======================================================================================
 from dataclasses import dataclass
+from os import wait
 
 import nltk
-from lark import Lark, Token
+from lark import Lark, Token, Tree
 
 
 # ======================================================================================
@@ -43,19 +44,43 @@ ITEM : /[a-z]+/
 
 """
 
-parser = Lark(grammar, parser="earley")
 
-tree = parser.parse("how much is the jacket")
-print(tree.pretty())
-
-
-def print_subtree(tree, depth=0):
-    if isinstance(tree, Token):
-        print("  " * depth + f"{tree.type} = {tree.value}")
+def print_tree(node, depth=0):
+    if isinstance(node, Token):
+        print("  " * depth + f"{node.type} = {node.value}")
         return
-    print("  " * depth + tree.data)
-    for subtree in tree.children:
-        print_subtree(subtree, depth + 1)
+    print("  " * depth + node.data)
+    for subtree in node.children:
+        print_tree(subtree, depth + 1)
 
 
-print_subtree(tree)
+def test_nlp():
+    parser = Lark(grammar, parser="earley")
+    tree = parser.parse("how much is the jacket")
+    print_tree(tree)
+
+
+def process_query(query: str) -> str:
+    parser = Lark(grammar, parser="earley")
+    tree = parser.parse(query)
+    query_node: Tree | Token = tree.children[0]
+    if isinstance(query_node, Token):
+        return "Unable to process query"
+    if query_node.data == "price_question":
+        item = list(query_node.find_token("ITEM"))[0]
+        price = products[item.value].price
+        return f"The price of {item.value} is {price}$"
+    return "Unknown query"
+
+
+# ======================================================================================
+#                                      MAIN
+# ======================================================================================
+def main():
+    query = input("Query > ")
+    response = process_query(query)
+    print(response)
+
+
+if __name__ == "__main__":
+    main()
