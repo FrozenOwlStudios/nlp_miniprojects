@@ -2,6 +2,32 @@
 #                                     IMPORTS
 # =====================================================================================
 import ollama
+import logging
+
+# =====================================================================================
+#                                     LOGGER
+# =====================================================================================
+logger = logging.getLogger("rag_chat")
+
+def initialize_logger()-> None:
+    global logger
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler("local/chat.log")
+    fh.setLevel(logging.DEBUG)
+    # create console handler with a higher log level
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.ERROR)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    # add the handlers to the logger
+    # logger.addHandler(fh)
+    # logger.addHandler(ch)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.DEBUG)
+    root_logger.addHandler(fh)
+    root_logger.addHandler(ch)
 
 # =====================================================================================
 #                                  KNOWLEDGE BASE
@@ -18,15 +44,15 @@ knowledge_base = {
 #                                  CONTEXT BUILDER
 # =====================================================================================
 def prepare_context(question: str)-> str:
-    print(f"RUNNING RAG - > {question}")
+    logger.info(f"RUNNING RAG - > {question}")
     question = question.lower()
 
     for keyword, definition in knowledge_base.items():
         if keyword in question:
-            print(f"RAG RESPONSE -> {definition}")
+            logger.info(f"RAG RESPONSE -> {definition}")
             return definition
 
-    print(f"RAG RESPONSE -> No relevant information found.")
+    logger.info(f"RAG RESPONSE -> No relevant information found.")
     return "No relevant information found."
 
 # =====================================================================================
@@ -67,6 +93,7 @@ def run_test_questions()-> None:
 #                                    MAIN 
 # =====================================================================================
 def main()->None:
+    initialize_logger()
     run_test_questions()
 
 if __name__ == "__main__":
