@@ -1,16 +1,17 @@
 # =====================================================================================
 #                                     IMPORTS
 # =====================================================================================
-import ollama
 import logging
+import ollama
+
 
 # =====================================================================================
 #                                     LOGGER
 # =====================================================================================
 logger = logging.getLogger("rag_chat")
 
-def initialize_logger()-> None:
-    global logger
+
+def initialize_logger() -> None:
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler("local/chat.log")
     fh.setLevel(logging.DEBUG)
@@ -18,7 +19,9 @@ def initialize_logger()-> None:
     ch = logging.StreamHandler()
     ch.setLevel(logging.ERROR)
     # create formatter and add it to the handlers
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     fh.setFormatter(formatter)
     ch.setFormatter(formatter)
     # add the handlers to the logger
@@ -28,6 +31,7 @@ def initialize_logger()-> None:
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(fh)
     root_logger.addHandler(ch)
+
 
 # =====================================================================================
 #                                  KNOWLEDGE BASE
@@ -43,22 +47,23 @@ knowledge_base = {
 # =====================================================================================
 #                                  CONTEXT BUILDER
 # =====================================================================================
-def prepare_context(question: str)-> str:
-    logger.info(f"RUNNING RAG - > {question}")
+def prepare_context(question: str) -> str:
+    logger.info("RUNNING RAG - > %s", question)
     question = question.lower()
 
     for keyword, definition in knowledge_base.items():
         if keyword in question:
-            logger.info(f"RAG RESPONSE -> {definition}")
+            logger.info("RAG RESPONSE -> %s", definition)
             return definition
 
-    logger.info(f"RAG RESPONSE -> No relevant information found.")
+    logger.info("RAG RESPONSE -> No relevant information found.")
     return "No relevant information found."
 
+
 # =====================================================================================
-#                                      CHAT 
+#                                      CHAT
 # =====================================================================================
-def ask(question: str)-> str:
+def ask(question: str) -> str:
     context = prepare_context(question)
 
     prompt = f"""
@@ -83,18 +88,21 @@ def ask(question: str)-> str:
 
     return response["message"]["content"]
 
-def run_test_questions()-> None:
+
+def run_test_questions() -> None:
     questions = ["Who invented python ?", "What is RAG?", "Who invented Java?"]
     for question in questions:
         print(f"QUESTION -> {question}")
         print(f"RESPONSE -> {ask(question)}")
 
+
 # =====================================================================================
-#                                    MAIN 
+#                                    MAIN
 # =====================================================================================
-def main()->None:
+def main() -> None:
     initialize_logger()
     run_test_questions()
+
 
 if __name__ == "__main__":
     main()

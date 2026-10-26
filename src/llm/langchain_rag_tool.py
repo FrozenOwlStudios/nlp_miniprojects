@@ -17,6 +17,7 @@ knowledge_base = {
 #                                  RAG AS TOOL
 # =====================================================================================
 
+
 def check_definition(word: str) -> str:
     """Verifies definition of a word
 
@@ -25,35 +26,26 @@ def check_definition(word: str) -> str:
     """
     return f"The term {word} means {knowledge_base[word]}"
 
+
 # =====================================================================================
 #                                  CHAT API
 # =====================================================================================
 
-def ask(question: str)-> str:
+
+def ask(question: str) -> str:
     response = ollama.chat(
         model="qwen2.5:0.5b",
-        messages=[
-            {
-                "role": "user",
-                "content": question
-            }
-        ],
-        tools=[check_definition]
+        messages=[{"role": "user", "content": question}],
+        tools=[check_definition],
     )
 
-
     if response.message.tool_calls:
-
         for call in response.message.tool_calls:
-
             print("Tool:", call.function.name)
             print("Arguments:", call.function.arguments)
 
             if call.function.name == "check_definition":
-
-                result = check_definition(
-                    **call.function.arguments
-                )
+                result = check_definition(**call.function.arguments)
 
                 print("Returning response from tool.")
                 return result
@@ -68,8 +60,9 @@ def ask(question: str)-> str:
 # =====================================================================================
 #                                     MAIN
 # =====================================================================================
-def main()-> None:
+def main() -> None:
     print(ask(input("Question>")))
+
 
 if __name__ == "__main__":
     main()
