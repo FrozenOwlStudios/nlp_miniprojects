@@ -122,20 +122,63 @@ class ConfigLogger:
         )
 
 
+def arg_llm_temperature(txt: str) -> float:
+    try:
+        val = float(txt)
+        if val < 0:
+            raise ArgumentTypeError(
+                f"LLM temperature must be no less than 0 ({val} given)."
+            )
+        return val
+    except ValueError as e:
+        raise ArgumentTypeError(
+            f'String "{txt}" is not a valid floating point number.'
+        ) from e
+
+
+@dataclass(frozen=True)
+class ConfigChatbot:
+    llm_model: str
+    llm_temp: float
+
+    @staticmethod
+    def add_args_to_parser(prsr: ArgumentParser) -> None:
+        prsr.add_argument(
+            "--llm_model",
+            type=str,
+            required=True,
+            help="Name of LLM model that will be used",
+        )
+        prsr.add_argument(
+            "--llm_temp",
+            type=arg_llm_temperature,
+            default=0.7,
+            help="LLM temperature (range from 0.7 to 0.8 for normal "
+            "responses 0.0 for fully deterministic and above 0.8 for "
+            "creative but unreliable ones).",
+        )
+
+    @staticmethod
+    def from_arguments(args: Namespace)-> ConfigChatbot:
+        return ConfigChatbot(llm_model=args.llm_model, llm_temp=args.llm_temp)
+
 @dataclass(frozen=True)
 class Config:
     log: ConfigLogger
+    chat: ConfigChatbot
 
     @staticmethod
     def from_args(argv: list[str] | None = None) -> Config:
         prsr = ArgumentParser(description=__doc__)
 
         ConfigLogger.add_args_to_parser(prsr)
+        ConfigChatbot.add_args_to_parser(prsr)
 
         args = prsr.parse_args(argv)
         log = ConfigLogger.from_arguments(args)
+        chat = ConfigChatbot.from_arguments(args)
 
-        return Config(log=log)
+        return Config(log=log, chat=chat)
 
 
 # =====================================================================================
