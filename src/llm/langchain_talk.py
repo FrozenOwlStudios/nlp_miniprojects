@@ -7,10 +7,11 @@ from argparse import ArgumentParser, ArgumentTypeError, Namespace
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
 from langchain_ollama import ChatOllama
+from langchain_core.prompts import ChatPromptTemplate
 
 # =====================================================================================
 #                                     LOGGER
@@ -141,6 +142,7 @@ def arg_llm_temperature(txt: str) -> float:
 class ConfigChatbot:
     llm_model: str
     llm_temp: float
+    llm_sys_msg: str
 
     @staticmethod
     def add_args_to_parser(prsr: ArgumentParser) -> None:
@@ -148,7 +150,7 @@ class ConfigChatbot:
             "--llm_model",
             type=str,
             required=True,
-            help="Name of LLM model that will be used",
+            help="Name of LLM model that will be used (DUMMY for fake model placeholder)",
         )
         prsr.add_argument(
             "--llm_temp",
@@ -158,10 +160,20 @@ class ConfigChatbot:
             "responses 0.0 for fully deterministic and above 0.8 for "
             "creative but unreliable ones).",
         )
+        prsr.add_argument(
+            "--llm_sys_msg",
+            type=str,
+            default="You are a person trying to maintain a conversation in private (1 on 1) chat channel",
+            help="Description that informs llm what role it is playing.",
+        )
 
     @staticmethod
     def from_arguments(args: Namespace) -> ConfigChatbot:
-        return ConfigChatbot(llm_model=args.llm_model, llm_temp=args.llm_temp)
+        return ConfigChatbot(
+            llm_model=args.llm_model,
+            llm_temp=args.llm_temp,
+            llm_sys_msg=args.llm_sys_msg,
+        )
 
 
 @dataclass(frozen=True)
@@ -187,16 +199,16 @@ class Config:
 #                                      CHAT CORE
 # =====================================================================================
 class Chatbot:
-    _model: ChatOllama|None
+    _model: ChatOllama | None
     _history: list[BaseMessage]
 
-    def __init__(self, model:str, temperature: float, system_msg: str)-> None:
+    def __init__(self, model: str, temperature: float, system_msg: str) -> None:
         self._model = None
         if model != "DUMMY":
             self._model = ChatOllama(model=model, temperature=temperature)
         self._history = [SystemMessage(system_msg)]
 
-    def talk(self, user_prompt: str)-> str:
+    def talk(self, user_prompt: str) -> str:
         self._history.append(HumanMessage(user_prompt))
         if not self._model:
             dummy_response = "Dummy model response"
@@ -207,19 +219,58 @@ class Chatbot:
         self._history.append(response)
         return str(response.content)
 
-    def __getitem__(self, key:int)-> str:
-        if not isinstance(key,int):
-            raise KeyError(f"Attempting to use {type()} instead of int as key for chat history")
-        if key<0 or key>=(len(self._history)-1):
-            raise IndexError(f"Valid chat history indexes are from 0 to {len(self._history)-1} "
-                             f"got {key} instead.")
+    def get_full_prompt(self) -> str:
+        prompt = ChatPromptTemplate.from_messages(self._history)
+        return prompt.pretty_repr()
+
+    def __getitem__(self, key: int) -> str:
+        if not isinstance(key, int):
+            raise KeyError(
+                f"Attempting to use {type()} instead of int as key for chat history"
+            )
+        if key < 0 or key >= (len(self._history) - 1):
+            raise IndexError(
+                f"Valid chat history indexes are from 0 to {len(self._history) - 1} "
+                f"got {key} instead."
+            )
         content: str | list[str | dict[Any, Any]] = self._history[key].content
         return str(content)
 
-    @staticmethod
-    def get_dummy_chatbot()-> Chatbot:
-        return Chatbot("DUMMY", 0.7, "Dummy chatbot system msg.")
 
+# =====================================================================================
+#                                      CHAT INTERFACE
+# =====================================================================================
+
+def chat_cmd_exit(_cmd: str, _chat:Chatbot)->bool:
+    return False
+
+CHATBOT_ESCAPE_CHAR = "!"
+
+chat_commands: dict[str, Callable[[str, Chatbot],bool]] = {
+    "exit": chat_cmd_exit,
+    "end": chat_cmd_exit,
+    "stop": chat_cmd_exit
+}
+
+def run_conversation(chat: Chatbot)-> None:
+    running: bool = True
+    while running:
+        user_msg: str = input("User > ")
+        user_msg = user_msg.strip()
+        # Empty user input
+        if not user_msg:
+            continue
+        # Handle commands
+        if user_msg[0] == CHATBOT_ESCAPE_CHAR:
+            cmd = user_msg[1:].lower()
+            try:
+                running = chat_commands[cmd](cmd, chat)
+            except KeyError:
+                print(f"Unknown command : {cmd}")
+            continue
+        # Normal chat interaction
+        chat_msg = chat.talk(user_msg)
+        print(f"Chatbot > {chat_msg}")
 
 # =====================================================================================
 #                                        MAIN
@@ -233,8 +284,8 @@ def main(argv: list[str] | None = None) -> None:
         cfg.log.log_level_global,
     )
     logger.info("Booting chat with config : %s", cfg)
-    chat = Chatbot.get_dummy_chatbot()
-    print(chat.talk("Hello"))
+    chat = Chatbot(cfg.chat.llm_model, cfg.chat.llm_temp, cfg.chat.llm_sys_msg)
+    run_conversation(chat)
 
 
 if __name__ == "__main__":
