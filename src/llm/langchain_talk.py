@@ -7,8 +7,9 @@ from argparse import ArgumentParser, ArgumentTypeError, Namespace
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
 from langchain_ollama import ChatOllama
 
 # =====================================================================================
@@ -159,8 +160,9 @@ class ConfigChatbot:
         )
 
     @staticmethod
-    def from_arguments(args: Namespace)-> ConfigChatbot:
+    def from_arguments(args: Namespace) -> ConfigChatbot:
         return ConfigChatbot(llm_model=args.llm_model, llm_temp=args.llm_temp)
+
 
 @dataclass(frozen=True)
 class Config:
@@ -184,6 +186,39 @@ class Config:
 # =====================================================================================
 #                                      CHAT CORE
 # =====================================================================================
+class Chatbot:
+    _model: ChatOllama|None
+    _history: list[BaseMessage]
+
+    def __init__(self, model:str, temperature: float, system_msg: str)-> None:
+        self._model = None
+        if model != "DUMMY":
+            self._model = ChatOllama(model=model, temperature=temperature)
+        self._history = [SystemMessage(system_msg)]
+
+    def talk(self, user_prompt: str)-> str:
+        self._history.append(HumanMessage(user_prompt))
+        if not self._model:
+            dummy_response = "Dummy model response"
+            self._history.append(AIMessage(dummy_response))
+            return dummy_response
+
+        response: AIMessage = self._model.invoke(self._history)
+        self._history.append(response)
+        return str(response.content)
+
+    def __getitem__(self, key:int)-> str:
+        if not isinstance(key,int):
+            raise KeyError(f"Attempting to use {type()} instead of int as key for chat history")
+        if key<0 or key>=(len(self._history)-1):
+            raise IndexError(f"Valid chat history indexes are from 0 to {len(self._history)-1} "
+                             f"got {key} instead.")
+        content: str | list[str | dict[Any, Any]] = self._history[key].content
+        return str(content)
+
+    @staticmethod
+    def get_dummy_chatbot()-> Chatbot:
+        return Chatbot("DUMMY", 0.7, "Dummy chatbot system msg.")
 
 
 # =====================================================================================
@@ -198,6 +233,8 @@ def main(argv: list[str] | None = None) -> None:
         cfg.log.log_level_global,
     )
     logger.info("Booting chat with config : %s", cfg)
+    chat = Chatbot.get_dummy_chatbot()
+    print(chat.talk("Hello"))
 
 
 if __name__ == "__main__":
