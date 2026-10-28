@@ -1,3 +1,6 @@
+""" This is a simple example of interactive console based chat with ollama as 
+LLM server. To run command instead of chatting start your prompt with "!". 
+To get list of commands write "!help"."""
 # =====================================================================================
 #                                       INCLUDES
 # =====================================================================================
@@ -10,8 +13,9 @@ from pathlib import Path
 from typing import Any, Callable
 
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
-from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama import ChatOllama
+
 
 # =====================================================================================
 #                                     LOGGER
@@ -163,7 +167,8 @@ class ConfigChatbot:
         prsr.add_argument(
             "--llm_sys_msg",
             type=str,
-            default="You are a person trying to maintain a conversation in private (1 on 1) chat channel",
+            default="You are a person trying to maintain a conversation in"
+            " private (1 on 1) chat channel",
             help="Description that informs llm what role it is playing.",
         )
 
@@ -241,19 +246,30 @@ class Chatbot:
 #                                      CHAT INTERFACE
 # =====================================================================================
 
-def chat_cmd_exit(_cmd: str, _chat:Chatbot)->bool:
+
+def chat_cmd_exit(_cmd: str, _chat: Chatbot) -> bool:
+    """Closes chat."""
     return False
 
-CHATBOT_ESCAPE_CHAR = "!"
+def print_history(_cmd: str, chat: Chatbot)-> bool:
+    """Prints all messages in chat history"""
+    print(chat.get_full_prompt())
+    return True
 
-chat_commands: dict[str, Callable[[str, Chatbot],bool]] = {
+CHATBOT_ESCAPE_CHAR = "!"
+CHATBOT_HELP_CMDS = ["h", "help"]
+
+chat_commands: dict[str, Callable[[str, Chatbot], bool]] = {
     "exit": chat_cmd_exit,
     "end": chat_cmd_exit,
-    "stop": chat_cmd_exit
+    "stop": chat_cmd_exit,
+    "history": print_history
 }
 
-def run_conversation(chat: Chatbot)-> None:
+
+def run_conversation(chat: Chatbot) -> None:
     running: bool = True
+    print(__doc__)
     while running:
         user_msg: str = input("User > ")
         user_msg = user_msg.strip()
@@ -263,6 +279,11 @@ def run_conversation(chat: Chatbot)-> None:
         # Handle commands
         if user_msg[0] == CHATBOT_ESCAPE_CHAR:
             cmd = user_msg[1:].lower()
+            if cmd in CHATBOT_HELP_CMDS:
+                for cmd_code in CHATBOT_HELP_CMDS:
+                    print("Prints list of commands (this list).")
+                for cmd_code, handler in chat_commands.items():
+                    print(f"{cmd_code} : {handler.__doc__} ")
             try:
                 running = chat_commands[cmd](cmd, chat)
             except KeyError:
@@ -271,6 +292,7 @@ def run_conversation(chat: Chatbot)-> None:
         # Normal chat interaction
         chat_msg = chat.talk(user_msg)
         print(f"Chatbot > {chat_msg}")
+
 
 # =====================================================================================
 #                                        MAIN
