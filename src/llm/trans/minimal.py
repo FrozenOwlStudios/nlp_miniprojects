@@ -8,7 +8,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 #                                     CONFIG
 # =====================================================================================
 
-MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
+MODEL_NAME = "Qwen/Qwen2.5-0.5B"
 
 # =====================================================================================
 #                                   KNOWLEDGE BASE

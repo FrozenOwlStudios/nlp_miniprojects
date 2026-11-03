@@ -35,6 +35,7 @@ nlp = [
 llm = [
     "langchain",
     "langchain-ollama",
+    "langchain_huggingface",
     "transformers"
 ]
 
