@@ -34,12 +34,15 @@ nlp = [
 
 llm = [
     "langchain",
-    "langchain-ollama"
+    "langchain-ollama",
+    "transformers"
 ]
 
 ml = [
     "pandas",
-    "numpy"
+    "numpy",
+    "torch",
+    "accelerate"
 ]
 
 data_visualisation = [
