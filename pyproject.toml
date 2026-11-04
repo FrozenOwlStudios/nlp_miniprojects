@@ -36,7 +36,8 @@ llm = [
     "langchain",
     "langchain-ollama",
     "langchain_huggingface",
-    "transformers"
+    "transformers",
+    "bitsandbytes"
 ]
 
 ml = [
